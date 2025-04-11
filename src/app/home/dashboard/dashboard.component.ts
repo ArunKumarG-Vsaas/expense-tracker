@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { chartConfig, graphFilter, htmlLabel } from 'src/app/core/config/common-config';
+import { chartConfig, graphFilter, htmlLabel, pieChartFilter } from 'src/app/core/config/common-config';
 import Chart, { ChartTypeRegistry } from 'chart.js/auto';
 import { ExpenseTableData } from 'src/app/core/interfaces/interface';
 import { ExpenseService } from 'src/app/core/services/expense.service';
@@ -15,6 +15,7 @@ import { Router } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
   public graphFilter: any[] = graphFilter;
+  public pieChartFilter: any[] = pieChartFilter
   public htmlLabel: any = htmlLabel;
 
   public weeklyChart: any;
@@ -34,6 +35,9 @@ export class DashboardComponent implements OnInit {
   public expenseDataFromAPI: any; 
 
   public graphWeekFilter: string = graphFilter[0].option;
+  public pieChartOptionSelected: string = pieChartFilter[0].option;
+  public pieChartDataToRender: any[] = [];
+  public currentPieChartType: string = 'category';
 
   public refreshData: BehaviorSubject<any> = new BehaviorSubject(null);
   constructor(
@@ -55,10 +59,10 @@ export class DashboardComponent implements OnInit {
           if(this.expenseDataFromAPI.allExpenses){
             this.expenseTableData.data = this._getRecentExpense(data);
             this.refreshData.next(this._getRecentExpense(data));
-           
+            this._trimPieOptionToAvailableMonths();
             setTimeout(() => {
               if(this.expenseDataFromAPI.allExpenses.length){
-                this.createPieChart(data.data, 'category');
+                this.createPieChartData(pieChartFilter[0].option);
                 this.createWeeklyGraph('bar', graphFilter[0].option);
                 
               }
@@ -141,6 +145,7 @@ export class DashboardComponent implements OnInit {
   }
 
   public createPieChart(data: any, type: string){
+    this.currentPieChartType = type;
     if(this.categoryChart) this.categoryChart.destroy(); 
 
     Chart.defaults.color = chartConfig.TEXT_COLOR;
@@ -217,6 +222,63 @@ export class DashboardComponent implements OnInit {
   public gotoAddExpense(){
     this._routeService.setTitle(this._routeService.findRoute(routesConfig.ADD_EXPENSE));
     this._router.navigate([routesConfig.HOME, routesConfig.ADD_EXPENSE]);
+  }
+
+  // Pie Chart Filter Feature:
+  public createPieChartData(option: string){
+    // console.log(this.expenseDataFromAPI)
+    let expenses: any[] = [];
+    if(option && option.length === 3){
+      expenses = this.expenseDataFromAPI.monthlyExpenses.find((exp: any) => exp.month == option)?.expenses;
+    }
+    else if(option == pieChartFilter[0].option){
+      expenses = this.expenseDataFromAPI.currentWeekExpenses.data;
+    }
+    else if(option == pieChartFilter[1].option){
+      expenses = this.expenseDataFromAPI.previousWeekExpenses.data;
+    }
+    this._buildPieChartParameter(expenses);
+
+
+  }
+
+  private _buildPieChartParameter(expenses : any[]){
+    // Mode [{ mode: "Cash", amount: 6149}]
+    const data: any = {
+      expenseCategoryData: [],
+      expenseModeData: []
+    };
+    if(expenses && expenses.length){
+      expenses.forEach((expense: any) => {
+        const modeData = expenses.filter(exp => exp.mode == expense.mode);
+        if(!data.expenseModeData.find((mode: any) => mode.mode == expense.mode)) data.expenseModeData.push({ mode : expense.mode,  amount : this._expenseService.calculateTotal(modeData) });
+      })
+    }
+
+    // Category { category: "LIC", amount: 23210.04}
+    if(expenses && expenses.length){
+      expenses.forEach((expense: any) => {
+        const categoryData = expenses.filter(exp => exp.category == expense.category);
+        if(!data.expenseCategoryData.find((category: any) => category.category == expense.category)) data.expenseCategoryData.push({ category : expense.category,  amount : this._expenseService.calculateTotal(categoryData) });
+      })
+    }
+    this.pieChartDataToRender = data;
+    this.createPieChart(this.pieChartDataToRender, this.currentPieChartType);
+  }
+
+  private _trimPieOptionToAvailableMonths(){
+    const result: any[] = [
+      pieChartFilter[0],
+      pieChartFilter[1]
+    ];
+
+    this.pieChartFilter.forEach(option => {
+      if(this.expenseDataFromAPI.monthlyExpenses.find((exp: any) => exp.month == option.option)){
+        result.push(option);
+      }
+    })
+
+    this.pieChartFilter = result;
   }
 
 }

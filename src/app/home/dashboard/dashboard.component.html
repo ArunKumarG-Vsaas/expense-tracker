@@ -47,16 +47,21 @@
         <div class="bar-section">
           <div class="text-medium weight-600">
             {{ htmlLabel['TEXT']['PIE_CHART_NAME'] }}
+            <div>
+              <select [ngModel]="pieChartOptionSelected" (ngModelChange)="createPieChartData($event)" class="text-small">
+                <option  *ngFor="let option of pieChartFilter" [value]="option.option">{{option.option}}</option>
+              </select>
+            </div>
           </div>
           <div>
             <canvas id="pieChart" class="text-small" >{{ categoryChart }}</canvas>
           </div>
           <div class="text-medium">
             <div>
-              <label class="pointer"><input type="radio" (click)="createPieChart(expenseDataFromAPI, 'category')" name="pieChartType" checked> {{ htmlLabel['TEXT']['CATEGORY'] }} </label>
+              <label class="pointer"><input type="radio" (click)="createPieChart(pieChartDataToRender, 'category')" name="pieChartType" checked> {{ htmlLabel['TEXT']['CATEGORY'] }} </label>
             </div>
             <div>
-              <label class="pointer"><input type="radio" (click)="createPieChart(expenseDataFromAPI, 'mode')" name="pieChartType"> {{ htmlLabel['TEXT']['MODE'] }}</label>
+              <label class="pointer"><input type="radio" (click)="createPieChart(pieChartDataToRender, 'mode')" name="pieChartType"> {{ htmlLabel['TEXT']['MODE'] }}</label>
             </div>
           </div>
         </div>

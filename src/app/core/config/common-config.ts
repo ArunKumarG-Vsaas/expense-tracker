@@ -42,8 +42,7 @@ export const messages = {
     },
     SUCCESS: {
         CATEGORY_ADDED: "Category added successfully",
-        LOGGED_OUT: "Logged out successfully",
-        
+        LOGGED_OUT: "Logged out successfully",     
     }
 }
 
@@ -140,6 +139,51 @@ export const graphFilter = [
         option: "Monthly"
     }
 ];
+
+export const pieChartFilter = [
+    {
+        option: "This Week"
+    },
+    {
+        option: "Last Week"
+    },
+    {
+        option: "Jan"
+    },
+    {
+        option: "Feb"
+    },
+    {
+        option: "Mar"
+    },
+    {
+        option: "Apr"
+    },
+    {
+        option: "May"
+    },
+    {
+        option: "Jun"
+    },
+    {
+        option: "Jul"
+    },
+    {
+        option: "Aug"
+    },
+    {
+        option: "Sep"
+    },
+    {
+        option: "Oct"
+    },
+    {
+        option: "Nov"
+    },
+    {
+        option: "Dec"
+    }
+]
 
 
 export const chartConfig = {
