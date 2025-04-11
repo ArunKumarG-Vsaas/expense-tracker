@@ -143,7 +143,6 @@ select:active{
     justify-content: center;
 }
 
-
 /* Media query */
 @media screen and (max-width: 600px){
     .top-section{
